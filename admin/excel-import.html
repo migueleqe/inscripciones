@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración</title>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+</head>
+<body>
+    <header class="admin-header">
+        <h1>Panel de Control</h1>
+        <a href="../index.html" class="btn">Volver</a>
+    </header>
+
+    <main class="admin-container">
+        <section class="admin-section">
+            <h2>Acciones Rápidas</h2>
+            <div class="action-buttons">
+                <a href="excel-import.html" class="btn btn-primary">
+                    <i class="fas fa-file-import"></i> Importar desde Excel
+                </a>
+                <button id="exportBtn" class="btn">
+                    <i class="fas fa-file-export"></i> Exportar Respaldo
+                </button>
+            </div>
+        </section>
+
+        <section class="admin-section">
+            <h2>Todas las Materias</h2>
+            <div id="coursesTable" class="courses-table"></div>
+        </section>
+    </main>
+
+    <script src="../assets/js/database.js"></script>
+    <script>
+        // Mostrar todas las materias
+        function refreshCourses() {
+            const courses = db.getCourses();
+            const container = document.getElementById('coursesTable');
+            
+            container.innerHTML = courses.length > 0 ? `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Asignatura</th>
+                            <th>Grupo</th>
+                            <th>Horario</th>
+                            <th>Aula</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${courses.map(course => `
+                            <tr>
+                                <td>${course.name}</td>
+                                <td>${course.group}</td>
+                                <td>${course.day} ${course.start}-${course.end}</td>
+                                <td>${course.classroom}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            ` : '<p class="no-data">No hay materias registradas</p>';
+        }
+
+        // Exportar datos
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            const data = db.exportData();
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `respaldo-horarios-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        });
+
+        // Inicializar
+        refreshCourses();
+    </script>
+</body>
+</html>

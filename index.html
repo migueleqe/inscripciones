@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Horarios</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+    <header class="header">
+        <h1>Horarios Académicos</h1>
+    </header>
+
+    <main class="container">
+        <div class="search-box">
+            <input type="text" id="studentInput" placeholder="Nombre del alumno">
+            <button id="searchBtn" class="btn">Buscar Horario</button>
+        </div>
+        <div id="scheduleResult" class="schedule-container"></div>
+    </main>
+
+    <script src="assets/js/database.js"></script>
+    <script>
+        document.getElementById('searchBtn').addEventListener('click', () => {
+            const student = document.getElementById('studentInput').value.trim();
+            if (!student) return;
+
+            const schedule = db.getStudentSchedule(student);
+            const resultDiv = document.getElementById('scheduleResult');
+            
+            if (!schedule || schedule.length === 0) {
+                resultDiv.innerHTML = `<p class="no-results">No se encontró horario para ${student}</p>`;
+                return;
+            }
+
+            resultDiv.innerHTML = `
+                <h2>Horario de ${student}</h2>
+                <div class="schedule-grid">
+                    ${schedule.map(courseId => {
+                        const course = db.getCourseById(courseId);
+                        return course ? `
+                            <div class="schedule-card">
+                                <h3>${course.name}</h3>
+                                <p><strong>Horario:</strong> ${course.day} ${course.start} - ${course.end}</p>
+                                <p><strong>Aula:</strong> ${course.classroom}</p>
+                                <p><strong>Profesor:</strong> ${course.professor}</p>
+                            </div>
+                        ` : '';
+                    }).join('')}
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html>
